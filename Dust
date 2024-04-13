@@ -1,13 +1,35 @@
+// #include <Wire.h>
+
+// void setup() {
+//  Serial.begin(9600); /* открываем серийный порт для дебаггинга */
+//  Wire.begin(5, 4); /* задаем i2c мост через контакты SDA=D1 и SCL=D2 на NodeMCU */
+// }
+
+// void loop() {
+//  Wire.beginTransmission(8); /* Начинаем передачу на адресе 8 */
+//  Wire.write("Hello Arduino");  /* Отправляем "hello Arduino" */
+//  Wire.endTransmission();    /* прекращаем передачу */
+
+//  Wire.requestFrom(8, 13); /* запрашиваем и считываем 13 байт с адреса 8 slave устройства */
+//  while(Wire.available()){
+//     char c = Wire.read();
+//   Serial.print(c);
+//  }
+//  Serial.println();
+//  delay(1000);
+// }
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <Wire.h>
 
-#define ssid  "" //write your SSID
-#define password  "" //write password
+#define ssid  "apart21" //write your SSID
+#define password  "kirzhach" //write password
 #define mqtt_server "test.mosquitto.org" //url or ip mqtt server
 #define mqtt_port 1883 //port for mqtt server
 
-#define DUST_STATE_TOPIC "Project_DUST_STATE_TOPIC"
-#define DUST_POWER_TOPIC "Project_DUST_POWER_TOPIC"
+#define DUST_ST "DUST_ST"
+#define DUST_PW "DUST_PW"
 
 #define pinLed 5
 #define buttonPin 16
@@ -49,13 +71,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
     input += (char)payload[i];
   }
   Serial.println();
-  if (String(topic) == DUST_STATE_TOPIC) {
-    analogWrite(3, input.toInt());
+  if (String(topic) == DUST_ST) {
+      // char Mess[3]
+      
+      Wire.beginTransmission(8);
+      Wire.write(21);
+      Wire.endTransmission(); 
   }
 
-  if (String(topic) == DUST_STATE_TOPIC) {
-    analogWrite(6, input.toInt());
-  }
 
 }
 
@@ -72,8 +95,8 @@ void reconnect() {
     // Attempt to connect
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
-      client.subscribe(DUST_STATE_TOPIC);
-      client.subscribe(DUST_POWER_TOPIC);
+      client.subscribe(DUST_ST);
+      client.subscribe(DUST_PW);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -86,9 +109,10 @@ void reconnect() {
 
 
 void setup() {
-  pinMode(pinLed, OUTPUT);
-  pinMode(buttonPin, INPUT);
-  pinMode(button_LED_Pin, OUTPUT);
+  Wire.begin(5, 4);
+  // pinMode(pinLed, OUTPUT);
+  // pinMode(buttonPin, INPUT);
+  // pinMode(button_LED_Pin, OUTPUT);
 
   Serial.begin(115200);
 
@@ -103,15 +127,15 @@ void loop() {
     reconnect();
   }
   client.loop();
-  if (digitalRead(buttonPin) == HIGH) {
-    while (digitalRead(buttonPin) == HIGH);
-    Serial.print("Rbutton:   ");
-    Serial.println(state);
-    if (state == true)
-      client.publish("Project_DUST_STATE_TOPIC", "0");
-    else
-      client.publish("Project_DUST_STATE_TOPIC", "1");
-    delay(300);
-  }
+  // if (digitalRead(buttonPin) == HIGH) {
+  //   while (digitalRead(buttonPin) == HIGH);
+  //   Serial.print("Rbutton:   ");
+  //   Serial.println(state);
+  //   if (state == true)
+  //     client.publish("Pr_DUST_ST", "0");
+  //   else
+  //     client.publish("Pr_DUST_ST", "1");
+  //   delay(300);
+  // }
 
 }
