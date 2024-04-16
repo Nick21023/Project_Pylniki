@@ -1,0 +1,39 @@
+#include <Wire.h>
+
+void setup() {
+ Wire.begin(8);                /* задаем на шине i2c 8 адрес */
+ Wire.onReceive(receiveEvent); /* регистрируем полученное событие */
+ Wire.onRequest(requestEvent); /* регистрируем запрошенное событие */
+ Serial.begin(9600);           /* открываем серийный порт для дебаггинга */
+}
+
+void loop() {
+ delay(100);
+}
+
+// Функция для извлечения любых принимаемых данных от мастера на шину
+void receiveEvent(int howMany) {
+ while (0 <Wire.available()) {
+    char c = Wire.read();      /* получаем байт как символ*/
+    Serial.print(c);           /* выводим символ в серийный порт */
+  }
+ Serial.println();             /* переходим на новую строку */
+}
+
+int pwm;
+void setup()
+{
+ pinMode(6, OUTPUT);
+ pinMode(A0, INPUT);
+ pinMode(3, OUTPUT);
+ pinMode(5, OUTPUT);
+} 
+
+void loop(){
+  pwm = analogRead(A0);
+  pwm = map(pwm, 0, 1023, 0, 255); 
+  pwm = constrain(pwm, 0, 255);
+  analogWrite(6, pwm);
+  analogWrite(3, pwm);
+  analogWrite(5, pwm);
+}
